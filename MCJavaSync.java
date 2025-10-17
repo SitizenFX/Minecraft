@@ -1,4 +1,4 @@
-package com.example.minecraftsync;
+package com.example.mcjavasync;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 
 public class MCJavaSync extends JavaPlugin {
-
     private final Gson gson = new Gson();
 
     @Override
@@ -22,7 +21,7 @@ public class MCJavaSync extends JavaPlugin {
                     syncPlayer(player);
                 }
             }
-        }.runTaskTimer(this, 0L, 200L); // every 10 seconds
+        }.runTaskTimer(this, 0L, 200L); // every 10s
     }
 
     private void syncPlayer(Player player) {
@@ -44,15 +43,12 @@ public class MCJavaSync extends JavaPlugin {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
-
             OutputStream os = conn.getOutputStream();
             os.write(json.getBytes());
             os.flush();
             os.close();
-
-            conn.getResponseCode(); // trigger request
+            conn.getResponseCode();
             conn.disconnect();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
