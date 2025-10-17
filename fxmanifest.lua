@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'Elijah SitizenFX'
+author 'Elijah Siita / VidllQ Authority'
 description 'Minecraft Bridge for FiveM'
 version '1.0.0'
 
@@ -10,11 +10,10 @@ client_scripts {
 }
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
+    '@oxmysql/lib/MySQL.lua', -- optional if using database
     'server.lua'
 }
 
 dependencies {
-    'mysql-async'
+    'oxmysql' -- optional
 }
-
