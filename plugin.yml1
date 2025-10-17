@@ -1,0 +1,4 @@
+name: BedrockSync
+main: com.example.bedrocksync.BedrockSync
+version: 1.0
+api: 5.0.0
