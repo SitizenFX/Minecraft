@@ -2,7 +2,6 @@
   "name": "fivem-minecraft-bridge",
   "version": "1.0.0",
   "main": "index.js",
-  "description": "Node.js bridge to sync FiveM/FiveZ with Minecraft using Mineflayer bots",
   "scripts": {
     "start": "node index.js"
   },
