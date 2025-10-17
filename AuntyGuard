@@ -1,0 +1,140 @@
+// movement_validator.cpp
+// Simple movement validator: given previous and current positions + timestamps,
+// compute instantaneous speed and flag if it exceeds a configured threshold.
+//
+// Build: g++ -O2 -std=c++17 movement_validator.cpp -o movement_validator
+//
+// Usage examples shown in main().
+
+#include <iostream>
+#include <cmath>
+#include <chrono>
+#include <string>
+#include <vector>
+#include <optional>
+
+struct Vec3 {
+    double x, y, z;
+};
+
+struct Sample {
+    Vec3 pos;
+    // timestamp in seconds (unix epoch or monotonic seconds)
+    double t;
+};
+
+struct Violation {
+    double speed;
+    double max_allowed;
+    Sample prev;
+    Sample curr;
+    std::string reason;
+};
+
+class MovementValidator {
+public:
+    MovementValidator(double maxSpeedMetersPerSec)
+        : maxSpeed(maxSpeedMetersPerSec) {}
+
+    // returns optional Violation if movement exceeds allowed speed
+    std::optional<Violation> validate(const Sample& prev, const Sample& curr) const {
+        double dt = curr.t - prev.t;
+        if (dt <= 0) {
+            // non-positive delta time -> suspicious or out-of-order sample
+            return Violation{
+                .speed = 1e9,
+                .max_allowed = maxSpeed,
+                .prev = prev,
+                .curr = curr,
+                .reason = "non-positive dt"
+            };
+        }
+
+        double dx = curr.pos.x - prev.pos.x;
+        double dy = curr.pos.y - prev.pos.y;
+        double dz = curr.pos.z - prev.pos.z;
+        double dist = std::sqrt(dx*dx + dy*dy + dz*dz); // meters (or game units)
+        double speed = dist / dt;
+
+        if (speed > maxSpeed) {
+            return Violation{
+                .speed = speed,
+                .max_allowed = maxSpeed,
+                .prev = prev,
+                .curr = curr,
+                .reason = "exceeds max speed"
+            };
+        }
+
+        return std::nullopt;
+    }
+
+    double getMaxSpeed() const { return maxSpeed; }
+    void setMaxSpeed(double s) { maxSpeed = s; }
+
+private:
+    double maxSpeed;
+};
+
+// Helper: current unix time in seconds
+double now_seconds() {
+    using namespace std::chrono;
+    return duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
+}
+
+// Example CLI usage: read pairs of samples from stdin (simple demo)
+int main(int argc, char** argv) {
+    // Default maximum allowed speed (tweak for your game units)
+    double maxSpeed = 10.0; // units per second (configure to match your server)
+    if (argc > 1) {
+        maxSpeed = std::stod(argv[1]);
+    }
+
+    MovementValidator validator(maxSpeed);
+    std::cout << "MovementValidator running, max speed = " << validator.getMaxSpeed()
+              << " units/sec\n\n";
+
+    // Demo: hardcoded samples (replace / feed from your server)
+    // In real integration you'd call validate(prev, curr) for each player sample.
+    Sample s1 { .pos = {0.0, 0.0, 0.0}, .t = now_seconds() };
+    // simulate delay
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    Sample s2 { .pos = {8.0, 0.0, 0.0}, .t = now_seconds() }; // 8 units in 0.5s => 16 u/s
+
+    auto v = validator.validate(s1, s2);
+    if (v) {
+        std::cout << "VIOLATION: speed=" << v->speed << " max=" << v->max_allowed
+                  << " reason=" << v->reason << "\n";
+        std::cout << " prev=(" << v->prev.pos.x << "," << v->prev.pos.y << "," << v->prev.pos.z
+                  << ") t=" << v->prev.t << "\n";
+        std::cout << " curr=(" << v->curr.pos.x << "," << v->curr.pos.y << "," << v->curr.pos.z
+                  << ") t=" << v->curr.t << "\n";
+    } else {
+        std::cout << "Movement OK\n";
+    }
+
+    // Example loop reading plain lines with: playerId prev_x prev_y prev_z prev_t curr_x curr_y curr_z curr_t
+    // (This is optional: uncomment to enable stdin parsing)
+    /*
+    std::cout << "Now reading samples from stdin, each line:\n"
+              << "prev_x prev_y prev_z prev_t curr_x curr_y curr_z curr_t\n";
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        if (line.empty()) continue;
+        std::istringstream iss(line);
+        Sample a,b;
+        if (!(iss >> a.pos.x >> a.pos.y >> a.pos.z >> a.t >> b.pos.x >> b.pos.y >> b.pos.z >> b.t)) {
+            std::cerr << "Bad input format\n";
+            continue;
+        }
+        auto viol = validator.validate(a,b);
+        if (viol) {
+            std::cout << "VIOL " << viol->speed << " > " << viol->max_allowed << " reason=" << viol->reason << "\n";
+        } else {
+            std::cout << "OK\n";
+        }
+    }
+    */
+
+    return 0;
+}
