@@ -15,13 +15,14 @@ This allows FiveZ servers to communicate with Minecraft worlds and players, enab
 ---
 
 ## 🧠 Tech Stack
+
 | Language | Purpose | Percentage |
-|-----------|----------|-------------|
+|----------|---------|------------|
 | **Lua** | FiveZ scripting & server runtime logic | 51.2% |
 | **JavaScript (Node.js)** | Minecraft communication & backend API | 48.8% |
 
 **Dependencies:**  
-`express`, `body-parser`, `mineflayer`, `cors` — all MIT-licensed
+`express`, `body-parser`, `mineflayer`, `cors` — all MIT-licensed  
 
 ---
 
@@ -36,7 +37,7 @@ This allows FiveZ servers to communicate with Minecraft worlds and players, enab
 ## 🚀 Installation
 ```bash
 # Clone the repository
-git clone https://github.com/YOURUSERNAME/fivez-minecraft-bridge.git
+git clone https://github.com/SitizenFX/Minecraft.git
 cd fivez-minecraft-bridge
 
 # Install dependencies
