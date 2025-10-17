@@ -1,12 +1,11 @@
--- Minecraft bridge commands with error handling
-
+-- Command to join Minecraft server
 RegisterCommand("mcjoin", function(source, args, rawCommand)
     local playerName = GetPlayerName(source)
     
     PerformHttpRequest(
         "http://localhost:3000/mcjoin",
-        function(err, text, headers)
-            if err == 200 then
+        function(statusCode, text, headers)
+            if statusCode == 200 then
                 TriggerClientEvent("chat:addMessage", source, {
                     args = {"Minecraft", "✅ You have joined the Minecraft server!"}
                 })
@@ -22,14 +21,26 @@ RegisterCommand("mcjoin", function(source, args, rawCommand)
     )
 end, false)
 
+-- Command to send chat message to Minecraft
 RegisterCommand("mcchat", function(source, args, rawCommand)
     local playerName = GetPlayerName(source)
     local msg = table.concat(args, " ")
+
+    if msg == "" then
+        TriggerClientEvent("chat:addMessage", source, {
+            args = {"Minecraft", "❌ Please provide a message to send."}
+        })
+        return
+    end
     
     PerformHttpRequest(
         "http://localhost:3000/mcchat",
-        function(err, text, headers)
-            if err ~= 200 then
+        function(statusCode, text, headers)
+            if statusCode == 200 then
+                TriggerClientEvent("chat:addMessage", source, {
+                    args = {"Minecraft", "✅ Message sent to Minecraft!"}
+                })
+            else
                 TriggerClientEvent("chat:addMessage", source, {
                     args = {"Minecraft", "❌ Message failed. Are you connected to the Minecraft server?"}
                 })
