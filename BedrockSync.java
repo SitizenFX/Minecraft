@@ -3,12 +3,10 @@ package com.example.bedrocksync;
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.Task;
-
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-
 import com.google.gson.Gson;
 
 public class BedrockSync extends PluginBase {
@@ -23,7 +21,7 @@ public class BedrockSync extends PluginBase {
                     syncPlayer(player);
                 }
             }
-        }, 20*10); // every 10 seconds
+        }, 20*10); // every 10s
     }
 
     private void syncPlayer(Player player) {
@@ -45,15 +43,12 @@ public class BedrockSync extends PluginBase {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
-
             OutputStream os = conn.getOutputStream();
             os.write(json.getBytes());
             os.flush();
             os.close();
-
             conn.getResponseCode();
             conn.disconnect();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
